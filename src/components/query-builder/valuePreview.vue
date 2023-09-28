@@ -1,32 +1,44 @@
 <template>
-      <q-card-section>
-        <q-select
-          v-if="vIndex > 0"
-          v-model="value.contains"
-          :options="containsOptions"
-          label="Contains"
-          outlined
-        />
-        <q-select
-          v-model="condition.selectedOperator"
-          :options="operators"
-          label="Table"
-          outlined
-        />
-        <q-input v-model="condition.value" label="Value" outlined />
-      </q-card-section>
+  <q-card-section>
+    <q-select
+      v-if="vIndex > 0"
+      v-model="value.contains"
+      :options="containsOptions"
+      label="Contains"
+      outlined
+    />
 
+    <q-input v-model="value.input" label="Value" outlined />
+  </q-card-section>
 </template>
 
+
 <script>
-import {Contain, LogicalOperator} from '../models'
+import { Contain, LogicalOperatorTypes } from '../models';
+
 export default {
-  
+  props: {
+    valueProp: {
+      type: Object,
+      required: true,
+    },
+    vIndex: {
+      type: Number,
+      required: true,
+    },
+  },
+
   data() {
     return {
-        value: {contains: Contain.ALL, input: [''], logicalOperator: LogicalOperator.OR }
+      value: {
+        contains: this.valueProp.contains,
+        input: this.valueProp.input,
+        logicalOperator: this.valueProp.logicalOperator,
+      },
     };
   },
+
+  methods: {},
 };
 </script>
 

@@ -7,9 +7,12 @@
     </q-header>
     <q-card
       >{{ condition }}
-      <q-card-section v-for="(condition, cIndex) in conditions" :key="cIndex">
-        <ConditionPreview :conditionProp="condition"> </ConditionPreview>
-      </q-card-section>
+      <ConditionPreview
+        v-for="(condition, cIndex) in conditions"
+        :key="cIndex"
+        :conditionProp="condition"
+      >
+      </ConditionPreview>
       <q-card-actions align="right">
         <q-btn label="Add Condition" @click="addCondition" color="primary" />
         <q-btn label="Execute Query" @click="executeQuery" color="primary" />
@@ -30,14 +33,12 @@ export default {
     return {
       conditions: [],
       lastConditionIndex: null,
-      lastGroupIndex: null,
     };
   },
 
   mounted() {
     let firstCondition = {
       groups: [],
-      values: [],
     };
 
     this.lastConditionIndex = 0;
@@ -48,7 +49,6 @@ export default {
     addCondition() {
       this.conditions.push({
         groups: [],
-        values: [],
       });
     },
 

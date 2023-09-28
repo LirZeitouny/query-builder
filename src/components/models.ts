@@ -1,7 +1,7 @@
 export interface Condition {
-  values: Value[];
-  groups: Group[];
-  logicalOperator: LogicalOperator;
+  groups: Group;
+  logicalOperator: LogicalOperatorTypes;
+  depth: number;
 }
 
 export interface Query {
@@ -11,21 +11,21 @@ export interface Query {
 export interface Value {
   contains: Contain;
   input: string[];
-  logicalOperator: LogicalOperator;
+  logicalOperator: LogicalOperatorTypes;
 }
 
 export interface Group {
   values: Value[];
-  logicalOperator: LogicalOperator;
-  depth: number;
+  logicalOperator: LogicalOperatorTypes;
+  group: Group;
 }
 
 export enum Contain {
-  'ANY',
-  'ALL',
+  ANY = 'ANY',
+  ALL = 'ALL',
 }
 
-export enum LogicalOperator {
-  'OR',
-  'AND',
+export enum LogicalOperatorTypes {
+  OR = 'OR',
+  AND = 'AND',
 }

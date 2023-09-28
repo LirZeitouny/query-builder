@@ -1,37 +1,46 @@
 <template>
   <q-card bordered>
-    <q-card-section style="display: flex" horizontal>
-      <!--         <q-select
-          v-model="selectedQueryType"
-          :options="queryTypeOptions"
-          label="Query Type"
-          outlined
-          style="min-width: 150px"
-        /> -->
-      <q-select
-        v-model="selectedTable"
-        :options="tableOptions"
-        multiple
-        label="Table Name"
-        outlined
-        style="min-width: 150px"
-      />
-
+    <q-card-section horizontal>
       <q-select
         v-model="selectedColumns"
         :options="columnsOptions"
         multiple
-        label="Columns"
+        label="Where"
         outlined
-        style="min-width: 150px"
+        class="q-ma-md col-6"
+        style="max-width: 300px"
+      />
+      <q-select
+        v-model="selectedTable"
+        :options="tableOptions"
+        label="In"
+        outlined
+        class="q-ma-md col-6"
+        style="max-width: 300px"
       />
     </q-card-section>
-    <GroupPreview
+    <q-card-section
       v-for="(group, gIndex) in condition.groups"
       :key="gIndex"
-    ></GroupPreview>
-    <ValuePreview v-for="(valuw, vIndex) in condition.values" :key="vIndex">
-    </ValuePreview>
+      :style="{ 'margin-left': gIndex * 40 + 'px' }"
+    >
+      <q-select
+        v-model="group.logicalOperator"
+        :options="logicalOperationOptions"
+        outlined
+        label="condition"
+        class="q-ma-md col-6"
+        style="max-width: 300px"
+      >
+      </q-select>
+      <ValuePreview
+        v-for="(value, vIndex) in group.values"
+        :key="vIndex"
+        :valueProp="value"
+        :vIndex="vIndex"
+      >
+      </ValuePreview>
+    </q-card-section>
     <q-card-section align="left">
       <q-btn label="Add Value" @click="addValue" />
       <q-btn label="Add Group" @click="addGroup" />
@@ -40,9 +49,8 @@
 </template>
 
 <script>
+import { Contain, LogicalOperatorTypes } from '../models';
 import ValuePreview from './valuePreview.vue';
-import GroupPreview from './groupPreview.vue';
-import { Contain, LogicalOperator } from '../models';
 
 export default {
   props: {
@@ -54,41 +62,57 @@ export default {
 
   components: {
     ValuePreview,
-    GroupPreview,
   },
 
   data() {
     return {
-      condition: { groups: conditionProp.groups, values: conditionProp.values },
+      condition: {
+        groups: this.conditionProp.groups,
+        depth: 0,
+      },
+
+      lastGroupIndex: null,
     };
+  },
+
+  computed: {
+    logicalOperationOptions() {
+      return Object.values(LogicalOperatorTypes);
+    },
   },
 
   methods: {
     addGroup() {
-      let newGroup = {
+      if (this.condition.depth == 3) return;
+
+      const newGroup = {
         values: [],
-        logicalOperator: LogicalOperator.OR,
+        logicalOperator: LogicalOperatorTypes.OR,
         depth: 0,
       };
 
-      lastConditionIndex &&
-        this.conditions[this.lastConditionIndex].groups.push(newGroup);
+      this.condition.groups.push(newGroup);
+      this.lastGroupIndex = this.condition.groups.length - 1;
+      this.condition.depth++;
+      this.addValue();
     },
 
     addValue() {
-      let newValue = {
-        contains: Contain.ANY,
-        input: [],
-        logicalOperator: LogicalOperator.OR,
-      };
+      if (this.lastGroupIndex !== null) {
+        const newValue = {
+          contains: Contain.ANY,
+          input: [],
+          logicalOperator: LogicalOperatorTypes.OR,
+        };
 
-      lastGroupIndex &&
-        this.conditions[this.lastConditionIndex].groups[
-          this.lastGroupIndex
-        ].push(newValue);
+        this.condition.groups[this.lastGroupIndex].values.push(newValue);
+      }
     },
   },
 };
 </script>
 
-<style></style>
+<style>
+</style>
+<style>
+</style>
