@@ -9,7 +9,7 @@ export interface Query {
 }
 
 export interface Value {
-  contains: Contain;
+  contains: ContainTypes;
   input: string[];
   logicalOperator: LogicalOperatorTypes;
 }
@@ -20,7 +20,7 @@ export interface Group {
   group: Group;
 }
 
-export enum Contain {
+export enum ContainTypes {
   ANY = 'ANY',
   ALL = 'ALL',
 }
