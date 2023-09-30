@@ -134,6 +134,17 @@ export default {
     this.addCondition(0);
   },
 
+  props: {
+    defaultContainType: {
+      type: String,
+      default: ContainTypes.ANY,
+    },
+    defaultLogicalOperator: {
+      type: String,
+      default: LogicalOperatorTypes.OR,
+    },
+  },
+
   computed: {
     logicalOperationOptions() {
       return Object.values(LogicalOperatorTypes);
@@ -188,9 +199,9 @@ export default {
 
     addValue(cIndex, gIndex) {
       const newValue = {
-        contains: ContainTypes.ANY,
+        contains: defaultContainType,
         input: [],
-        logicalOperator: LogicalOperatorTypes.OR,
+        logicalOperator: defaultLogicalOperator,
       };
 
       this.conditions[cIndex].groups[gIndex].values.push(newValue);
@@ -227,7 +238,7 @@ export default {
           res += '(';
           value.input.forEach((input, iIndex) => {
             let containsOperator =
-              value.contains === ContainTypes.ANY ? 'OR ' : 'AND ';
+              value.contains === defaultContainType ? 'OR ' : 'AND ';
             if (iIndex == value.input.length - 1) containsOperator = '';
 
             res += `${condition.column} LIKE '%${input}%' ${containsOperator}`;
