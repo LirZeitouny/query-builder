@@ -105,6 +105,14 @@
         <q-btn label="Execute Query" @click="executeQuery" color="primary" />
       </q-card-actions>
     </q-card>
+    <q-card>
+      <q-table
+        v-if="queryResult.length"
+        :rows="queryResult"
+        :columns="getColumns(queryResult)"
+        row-key="ID"
+      ></q-table>
+    </q-card>
   </q-page>
 </template>
 
@@ -118,6 +126,7 @@ export default {
       conditions: [],
       tableNameOptions: [],
       columnsOptions: [],
+      queryResult: [],
     };
   },
 
@@ -141,6 +150,7 @@ export default {
 
   methods: {
     async fetchTableColumns(tableName) {
+      if (!tableName) return;
       try {
         const response = await axios.get(`/api/columns?tableName=${tableName}`);
 
@@ -241,12 +251,46 @@ export default {
       return res.replace(/\s+/g, ' '); //removing duplicate spaces
     },
 
-    executeQuery() {
+    async executeQuery() {
       let query = '';
       this.conditions.forEach(
         (condition) => (query += this.queryBuilder(condition))
       );
+
+      if (!query) return;
+
       console.log(query);
+      try {
+        const response = await axios.post('/api/custom-query', {
+          query,
+        });
+
+        if (response.status !== 200) {
+          throw new Error('Failed to execute query');
+        }
+
+        this.queryResult = response.data;
+        console.log(this.queryResult);
+      } catch (error) {
+        console.error('Error fetching table information:', error);
+      }
+    },
+
+    getColumns(data) {
+      if (!data.length) return [];
+
+      const keys = Object.keys(data[0]);
+
+      const columns = keys.map((key) => ({
+        name: key,
+        required: true,
+        label: key,
+        align: 'left',
+        field: key,
+        sortable: true,
+      }));
+
+      return columns;
     },
   },
 };
