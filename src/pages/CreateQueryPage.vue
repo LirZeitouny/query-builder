@@ -5,6 +5,10 @@
         <q-toolbar-title>Create Custom Query</q-toolbar-title>
       </q-toolbar>
     </q-header>
+    <q-banner v-if="errorMessage" color="negative">
+      {{ errorMessage }}
+      <q-btn flat round dense icon="close" @click="errorMessage = ''" />
+    </q-banner>
     <q-card flat>
       <div v-for="(condition, cIndex) in conditions" :key="cIndex">
         <q-card-section horizontal>
@@ -127,6 +131,7 @@ export default {
       tableNameOptions: [],
       columnsOptions: [],
       queryResult: [],
+      errorMessage: '',
     };
   },
 
@@ -161,7 +166,11 @@ export default {
 
   methods: {
     async fetchTableColumns(tableName) {
-      if (!tableName) return;
+      if (!tableName) {
+        this.errorMessage =
+          'Could not fetch tables columns from you database. Missing name. Please try again.';
+      }
+
       try {
         const response = await axios.get(`/api/columns?tableName=${tableName}`);
 
@@ -170,7 +179,10 @@ export default {
         }
 
         this.columnsOptions = response.data;
+        this.errorMessage = '';
       } catch (error) {
+        this.errorMessage =
+          'Error fetching table information. Please try again.';
         console.error('Error fetching table information:', error);
       }
     },
@@ -178,9 +190,14 @@ export default {
     async fetchTableNames() {
       try {
         const response = await axios.get('/api/tables');
+
+        if (response.status !== 200) {
+          throw new Error('Failed to fetch tables name.');
+        }
         this.tableNameOptions = response.data;
       } catch (error) {
-        console.error('Error fetching table names:', error);
+        this.errorMessage = 'Error fetching tables names. Please try again.';
+        console.error('Error fetching tables names:', error);
       }
     },
 
@@ -268,7 +285,9 @@ export default {
         (condition) => (query += this.queryBuilder(condition))
       );
 
-      if (!query) return;
+      if (!query) {
+        this.errorMessage = 'Missing Query.';
+      }
 
       console.log(query);
       try {
@@ -277,12 +296,15 @@ export default {
         });
 
         if (response.status !== 200) {
-          throw new Error('Failed to execute query');
+          this.errorMessage = 'Error executing query.';
+          throw new Error('Failed to execute your query');
         }
 
         this.queryResult = response.data;
+        this.errorMessage = '';
         console.log(this.queryResult);
       } catch (error) {
+        this.errorMessage = 'Error executing query. Please try again.';
         console.error('Error executing query:', error);
       }
     },
