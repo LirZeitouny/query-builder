@@ -71,7 +71,7 @@
             />
             <q-select
               v-model="value.contains"
-              :options="ContainTypeOptions"
+              :options="containTypeOptions"
               label="Contains"
               outlined
               class="q-ma-md col-6"
@@ -139,7 +139,7 @@ export default {
       return Object.values(LogicalOperatorTypes);
     },
 
-    ContainTypeOptions() {
+    containTypeOptions() {
       return Object.values(ContainTypes);
     },
   },
@@ -272,7 +272,7 @@ export default {
         this.queryResult = response.data;
         console.log(this.queryResult);
       } catch (error) {
-        console.error('Error fetching table information:', error);
+        console.error('Error executing query:', error);
       }
     },
 
