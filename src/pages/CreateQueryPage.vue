@@ -10,21 +10,23 @@
         <q-card-section horizontal>
           <!-- Condition start -->
           <q-select
-            v-model="selectedColumns"
+            v-model="condition.column"
             :options="columnsOptions"
-            multiple
             label="Where"
             outlined
+            new-value-mode="add"
+            use-input
             class="q-ma-md col-6"
             style="max-width: 300px"
           />
           <q-select
-            v-model="selectedTable"
-            :options="tableOptions"
+            v-model="condition.tableName"
+            :options="tableNameOptions"
             label="In"
             outlined
             class="q-ma-md col-6"
             style="max-width: 300px"
+            @update:model-value="fetchTableColumns(condition.tableName)"
           />
         </q-card-section>
         <!-- Groups-->
@@ -52,12 +54,13 @@
             :key="vIndex"
             horizontal
           >
-            <q-label
+            <p
               class="q-ma-md col-4 text-center center-vertically"
               style="max-width: 100px"
               v-if="vIndex == 0"
-              >ARE</q-label
             >
+              ARE
+            </p>
             <q-select
               v-else
               v-model="value.logicalOperator"
@@ -75,10 +78,15 @@
               style="max-width: 300px"
             />
 
-            <q-input
+            <q-select
               class="q-ma-md col-6"
               style="max-width: 600px"
               v-model="value.input"
+              use-input
+              use-chips
+              new-value-mode="add"
+              multiple
+              hide-dropdown-icon
               label="Value"
               outlined
             />
@@ -101,13 +109,15 @@
 </template>
 
 <script>
-import { ContainTypes, LogicalOperatorTypes } from '../components/models';
+import axios from 'axios';
+import { ContainTypes, LogicalOperatorTypes } from './queryModel';
 
 export default {
   data() {
     return {
       conditions: [],
-      lastConditionIndex: null,
+      tableNameOptions: [],
+      columnsOptions: [],
     };
   },
 
@@ -125,7 +135,34 @@ export default {
     },
   },
 
+  created() {
+    this.fetchTableNames();
+  },
+
   methods: {
+    async fetchTableColumns(tableName) {
+      try {
+        const response = await axios.get(`/api/columns?tableName=${tableName}`);
+
+        if (response.status !== 200) {
+          throw new Error('Failed to fetch table information');
+        }
+
+        this.columnsOptions = response.data;
+      } catch (error) {
+        console.error('Error fetching table information:', error);
+      }
+    },
+
+    async fetchTableNames() {
+      try {
+        const response = await axios.get('/api/tables');
+        this.tableNameOptions = response.data;
+      } catch (error) {
+        console.error('Error fetching table names:', error);
+      }
+    },
+
     addGroup(cIndex, gIndex) {
       if (this.conditions[cIndex].depth == 3) return;
 
@@ -169,9 +206,47 @@ export default {
       this.addGroup(cIndex, -1);
     },
 
+    queryBuilder(condition) {
+      let res = 'SELECT * ';
+      res += `FROM ${condition.tableName} `;
+      res += 'WHERE ';
+
+      condition.groups.forEach((group, gIndex) => {
+        res += ' (';
+        group.values.forEach((value, vIndex) => {
+          res += '(';
+          value.input.forEach((input, iIndex) => {
+            let containsOperator =
+              value.contains === ContainTypes.ANY ? 'OR ' : 'AND ';
+            if (iIndex == value.input.length - 1) containsOperator = '';
+
+            res += `${condition.column} LIKE '%${input}%' ${containsOperator}`;
+          });
+
+          res += ')';
+
+          let valuesLogicalOperator =
+            vIndex === group.values.length - 1 ? '' : value.logicalOperator;
+          res += valuesLogicalOperator;
+
+          console.log(valuesLogicalOperator);
+        });
+        res += ') ';
+
+        let groupsLogicalOperator =
+          gIndex === condition.groups.length - 1 ? '' : group.logicalOperator;
+        res += groupsLogicalOperator;
+      });
+
+      return res.replace(/\s+/g, ' '); //removing duplicate spaces
+    },
+
     executeQuery() {
-      // Construct and execute the query based on the conditions
-      // You can i~mplement the query execution logic here
+      let query = '';
+      this.conditions.forEach(
+        (condition) => (query += this.queryBuilder(condition))
+      );
+      console.log(query);
     },
   },
 };
