@@ -199,9 +199,9 @@ export default {
 
     addValue(cIndex, gIndex) {
       const newValue = {
-        contains: defaultContainType,
+        contains: this.defaultContainType,
+        logicalOperator: this.defaultLogicalOperator,
         input: [],
-        logicalOperator: defaultLogicalOperator,
       };
 
       this.conditions[cIndex].groups[gIndex].values.push(newValue);
@@ -238,7 +238,7 @@ export default {
           res += '(';
           value.input.forEach((input, iIndex) => {
             let containsOperator =
-              value.contains === defaultContainType ? 'OR ' : 'AND ';
+              value.contains === this.defaultContainType ? 'OR ' : 'AND ';
             if (iIndex == value.input.length - 1) containsOperator = '';
 
             res += `${condition.column} LIKE '%${input}%' ${containsOperator}`;
