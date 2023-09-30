@@ -14,6 +14,14 @@
         <q-card-section horizontal>
           <!-- Condition start -->
           <q-select
+            v-if="cIndex > 0"
+            v-model="condition.logicalOperator"
+            :options="logicalOperationOptions"
+            outlined
+            class="q-ma-md col-6"
+            style="max-width: 100px"
+          />
+          <q-select
             v-model="condition.column"
             :options="columnsOptions"
             label="Where"
@@ -206,7 +214,7 @@ export default {
 
       const newGroup = {
         values: [],
-        logicalOperator: LogicalOperatorTypes.OR,
+        logicalOperator: this.defaultLogicalOperator,
       };
 
       this.conditions[cIndex].groups.splice(gIndex + 1, 0, newGroup);
@@ -234,14 +242,17 @@ export default {
         this.conditions.splice(cIndex, 1);
     },
 
-    addCondition(cIndex = 0) {
-      const firstCondition = {
+    addCondition() {
+      const newCondition = {
         groups: [],
         depth: 0,
+        logicalOperator: this.defaultLogicalOperator,
       };
 
-      this.conditions.splice(cIndex, 0, firstCondition);
-      this.addGroup(cIndex, -1);
+      const index =
+        this.conditions.length == 0 ? 0 : this.conditions.length - 1;
+      this.conditions.splice(index, 0, newCondition);
+      this.addGroup(index, -1);
     },
 
     queryBuilder(condition) {
@@ -263,7 +274,7 @@ export default {
 
           res += ')';
 
-          let valuesLogicalOperator =
+          const valuesLogicalOperator =
             vIndex === group.values.length - 1 ? '' : value.logicalOperator;
           res += valuesLogicalOperator;
 
@@ -281,15 +292,18 @@ export default {
 
     async executeQuery() {
       let query = '';
-      this.conditions.forEach(
-        (condition) => (query += this.queryBuilder(condition))
-      );
+      this.conditions.forEach((condition, index) => {
+        const conditionLogicalOperatoe =
+          index === this.conditions.length - 1 ? '' : condition.logicalOperator;
+        query += this.queryBuilder(condition) + conditionLogicalOperatoe + ' ';
+      });
+
+      console.log('Executing query:', query);
 
       if (!query) {
         this.errorMessage = 'Missing Query.';
       }
 
-      console.log(query);
       try {
         const response = await axios.post('/api/custom-query', {
           query,
@@ -302,7 +316,6 @@ export default {
 
         this.queryResult = response.data;
         this.errorMessage = '';
-        console.log(this.queryResult);
       } catch (error) {
         this.errorMessage = 'Error executing query. Please try again.';
         console.error('Error executing query:', error);
