@@ -131,7 +131,7 @@
 <script>
 import axios from 'axios';
 import { ContainTypes, LogicalOperatorTypes } from './queryModel';
-
+const MAX_DEPTH = 3;
 export default {
   data() {
     return {
@@ -210,7 +210,7 @@ export default {
     },
 
     addGroup(cIndex, gIndex) {
-      if (this.conditions[cIndex].depth == 3) return;
+      if (this.conditions[cIndex].depth === MAX_DEPTH) return;
 
       const newGroup = {
         values: [],
