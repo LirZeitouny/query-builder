@@ -97,12 +97,48 @@ To run the project, follow these steps:
 
 6. View the query results in a table format.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## Acknowledgments
 
 - The project was developed by [Lir Zeitouny](mailto:lirzetouny@gmail.com).
 
 Feel free to customize this README to suit your project's specific details and requirements.
+
+# Query Model Structure
+
+In this project, we define a query model structure in `queryModel.ts` to represent various aspects of our application's data and queries. This structure is used throughout the application for building and working with dynamic queries.
+
+## Condition
+
+The `Condition` interface represents a query condition and has the following properties:
+
+- `groups`: An array of `Group` objects, allowing conditions to be grouped together.
+- `logicalOperator`: Specifies the logical operator used to combine groups within this condition.
+- `depth`: Indicates the depth of nesting for this condition.
+- `columns`: Represents the selected columns for this condition.
+- `tableName`: Represents the selected table name for this condition.
+
+## Value
+
+The `Value` interface represents a single value within a query condition. It includes the following properties:
+
+- `contains`: Indicates whether this value should match any or all of the specified values.
+- `input`: An array of strings representing the input values.
+- `logicalOperator`: Specifies the logical operator used to combine input values within this value.
+
+## QueryResultItem
+
+The `QueryResultItem` interface represents an item in the query result. It includes properties such as `ID`, `Name`, `City`, `Position`, `Experience`, `Department`, and `Salary` to describe the attributes of a result item.
+
+## Group
+
+The `Group` interface represents a grouping of values within a query condition. It includes the following properties:
+
+- `values`: An array of `Value` objects, allowing multiple values to be grouped together.
+- `logicalOperator`: Specifies the logical operator used to combine values within this group.
+- `group` (optional): Represents a nested group within this group. It's optional, allowing for nested conditions.
+
+## Enums
+
+We also define two enums, `ContainTypes` and `LogicalOperatorTypes`, to provide predefined options for the `contains` property and logical operators used in the query model.
+
+These structures are essential for creating and managing dynamic queries within the application, offering flexibility and clarity when working with complex conditions and result sets.

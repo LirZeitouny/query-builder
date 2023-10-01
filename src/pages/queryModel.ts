@@ -1,5 +1,6 @@
+// queryModel.ts
 export interface Condition {
-  groups: Group;
+  groups: Group[];
   logicalOperator: LogicalOperatorTypes;
   depth: number;
   columns: string;
@@ -12,10 +13,21 @@ export interface Value {
   logicalOperator: LogicalOperatorTypes;
 }
 
+export interface QueryResultItem {
+  ID: number;
+  Name: string;
+  City: string;
+  Position: string;
+  Experience: number;
+  Department: string;
+  Salary: number;
+}
+
+// queryModel.ts
 export interface Group {
   values: Value[];
   logicalOperator: LogicalOperatorTypes;
-  group: Group;
+  group?: Group; // Make 'group' property optional with '?'
 }
 
 export enum ContainTypes {

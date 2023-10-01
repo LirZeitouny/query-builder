@@ -1,15 +1,29 @@
-import { createApp } from 'vue';
-import { createStore } from 'vuex';
+import { createStore, Commit } from 'vuex'; // Import Commit from vuex for type checking
 import axios from 'axios';
-import { ContainTypes, LogicalOperatorTypes } from '../pages/queryModel';
-import { queryBuilder } from './queryBuilderHelper'; // Replace with the actual path to your query builder file
+import {
+  ContainTypes,
+  LogicalOperatorTypes,
+  QueryResultItem,
+  Condition,
+  Value,
+  Group,
+} from '../pages/queryModel'; // Import your models
 
-const app = createApp();
-
-app.use(createStore());
+import { queryBuilder } from './queryBuilderHelper';
 
 const MAX_DEPTH = 3;
-const store = createStore({
+
+interface RootState {
+  conditions: Condition[];
+  tableNameOptions: string[];
+  columnsOptions: string[];
+  queryResult: QueryResultItem[]; // Change the type as per your query result
+  errorMessage: string;
+  defaultContainType: ContainTypes;
+  defaultLogicalOperator: LogicalOperatorTypes;
+}
+
+const store = createStore<RootState>({
   state: {
     conditions: [],
     tableNameOptions: [],
@@ -21,26 +35,27 @@ const store = createStore({
   },
 
   mutations: {
-    // Mutations for updating state go here
-    SET_CONDITION(state, conditionParams) {
-      const { condition, cIndex } = conditionParams;
+    SET_CONDITION(
+      state,
+      { condition, cIndex }: { condition: Condition; cIndex: number }
+    ) {
       state.conditions[cIndex] = condition;
     },
-    SET_TABLE_NAME_OPTIONS(state, options) {
+    SET_TABLE_NAME_OPTIONS(state, options: string[]) {
       state.tableNameOptions = options;
     },
-    SET_COLUMNS_OPTIONS(state, options) {
+    SET_COLUMNS_OPTIONS(state, options: string[]) {
       state.columnsOptions = options;
     },
-    SET_QUERY_RESULT(state, result) {
+    SET_QUERY_RESULT(state, result: any[]) {
       state.queryResult = result;
     },
-    SET_ERROR_MESSAGE(state, message) {
+    SET_ERROR_MESSAGE(state, message: string) {
       state.errorMessage = message;
     },
 
     ADD_CONDITION(state) {
-      const newCondition = {
+      const newCondition: Condition = {
         groups: [
           {
             values: [
@@ -55,16 +70,16 @@ const store = createStore({
         ],
         depth: 1,
         logicalOperator: state.defaultLogicalOperator,
-        column: '',
+        columns: '',
         tableName: '',
       };
       state.conditions.push(newCondition);
     },
 
-    ADD_GROUP(state, cIndex) {
+    ADD_GROUP(state, cIndex: number) {
       if (state.conditions[cIndex].depth === MAX_DEPTH) return;
 
-      const newGroup = {
+      const newGroup: Group = {
         values: [
           {
             contains: state.defaultContainType,
@@ -79,9 +94,8 @@ const store = createStore({
       state.conditions[cIndex].depth++;
     },
 
-    ADD_VALUE(state, Indexes) {
-      const { cIndex, gIndex } = Indexes;
-      const newValue = {
+    ADD_VALUE(state, { cIndex, gIndex }: { cIndex: number; gIndex: number }) {
+      const newValue: Value = {
         contains: state.defaultContainType,
         logicalOperator: state.defaultLogicalOperator,
         input: [],
@@ -90,8 +104,14 @@ const store = createStore({
       state.conditions[cIndex].groups[gIndex].values.push(newValue);
     },
 
-    DELETE_VALUE(state, Indexes) {
-      const { cIndex, gIndex, vIndex } = Indexes;
+    DELETE_VALUE(
+      state,
+      {
+        cIndex,
+        gIndex,
+        vIndex,
+      }: { cIndex: number; gIndex: number; vIndex: number }
+    ) {
       state.conditions[cIndex].groups[gIndex].values.splice(vIndex, 1);
       if (state.conditions[cIndex].groups[gIndex].values.length === 0) {
         state.conditions[cIndex].groups.splice(gIndex, 1);
@@ -103,7 +123,7 @@ const store = createStore({
   },
 
   actions: {
-    async fetchTableColumns({ commit }, tableName) {
+    async fetchTableColumns({ commit }: { commit: Commit }, tableName: string) {
       try {
         const response = await axios.get(`/api/columns?tableName=${tableName}`);
 
@@ -122,8 +142,13 @@ const store = createStore({
       }
     },
 
-    // Execute the query based on the conditions in the store
-    async executeQuery({ commit, state }) {
+    async executeQuery({
+      commit,
+      state,
+    }: {
+      commit: Commit;
+      state: RootState;
+    }) {
       let query = '';
       state.conditions.forEach((condition, index) => {
         const conditionLogicalOperator =
@@ -157,7 +182,7 @@ const store = createStore({
       }
     },
 
-    async initializeData({ commit }) {
+    async initializeData({ commit }: { commit: Commit }) {
       commit('ADD_CONDITION');
       try {
         const response = await axios.get('/api/tables');
@@ -179,9 +204,8 @@ const store = createStore({
   },
 
   getters: {
-    // Getters for computed properties go here
     logicalOperationOptions: (state) => Object.values(LogicalOperatorTypes),
-    containTypeOptions: (state) => Object.values(ContainTypes),
+    containTypeOptions: () => Object.values(ContainTypes), // No need for 'state' here
   },
 });
 
