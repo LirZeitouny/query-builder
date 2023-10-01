@@ -24,8 +24,6 @@ export function queryBuilder(condition) {
       const valuesLogicalOperator =
         vIndex === group.values.length - 1 ? '' : value.logicalOperator;
       res += valuesLogicalOperator;
-
-      console.log(valuesLogicalOperator);
     });
     res += ') ';
 

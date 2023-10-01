@@ -100,7 +100,6 @@ const store = createStore<RootState>({
         logicalOperator: state.defaultLogicalOperator,
         input: [],
       };
-      console.log(cIndex, gIndex);
       state.conditions[cIndex].groups[gIndex].values.push(newValue);
     },
 
