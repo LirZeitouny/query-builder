@@ -2,14 +2,14 @@
   <router-view />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import axios from 'axios';
+import { useStore } from 'vuex';
 
-// Configure Axios base URL
-import { defineComponent } from 'vue';
 axios.defaults.baseURL = 'http://localhost:3000';
 
-export default defineComponent({
-  name: 'App',
-});
+const store = useStore();
+
+// Call the initializeData action when the app starts
+store.dispatch('initializeData');
 </script>
