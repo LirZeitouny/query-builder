@@ -5,7 +5,9 @@
       <q-select
         v-if="cIndex > 0"
         :modelValue="conditionCopy.logicalOperator"
-        @update:model-value="updateLogicalOperator"
+        @update:model-value="
+          (value) => updateConditionProp('logicalOperator', value)
+        "
         :options="logicalOperationOptions"
         outlined
         class="q-ma-md col-6"
@@ -13,7 +15,7 @@
       />
       <q-select
         :modelValue="conditionCopy.column"
-        @update:model-value="updateColumn"
+        @update:model-value="(value) => updateConditionProp('column', value)"
         :options="columnsOptions"
         label="Where"
         outlined
@@ -24,7 +26,7 @@
       />
       <q-select
         :modelValue="conditionCopy.tableName"
-        @update:model-value="updateTableName"
+        @update:model-value="(value) => updateConditionProp('tableName', value)"
         :options="tableNameOptions"
         label="In"
         outlined
@@ -49,10 +51,12 @@
 </template>
 
 <script>
-import axios from 'axios';
-import { ContainTypes, LogicalOperatorTypes } from '../../pages/queryModel';
+import {
+  fetchTableNames,
+  fetchTableColumns,
+} from '../../services/queryServices';
+import { ContainTypes, LogicalOperatorTypes } from '../../types/queryModel';
 import GroupItem from './GroupItem.vue';
-
 const MAX_DEPTH = 3;
 
 export default {
@@ -84,23 +88,18 @@ export default {
   },
 
   async created() {
-    this.fetchTableNames();
+    this.tableNameOptions = await fetchTableNames();
   },
 
   methods: {
-    updateLogicalOperator(value) {
-      this.conditionCopy.logicalOperator = value;
-      this.$emit('update:condition', this.conditionCopy, this.cIndex);
-    },
-    updateColumn(value) {
-      this.conditionCopy.column = value;
+    updateConditionProp(key, value) {
+      this.conditionCopy[key] = value;
+      if (key === 'tableName') this.updateColumnsFromTable(value);
       this.$emit('update:condition', this.conditionCopy, this.cIndex);
     },
 
-    async updateTableName(value) {
-      this.conditionCopy.tableName = value;
-      await this.fetchTableColumns();
-      this.$emit('update:condition', this.conditionCopy, this.cIndex);
+    async updateColumnsFromTable(tableName) {
+      this.columnsOptions = await fetchTableColumns(tableName);
     },
 
     handleAddGroup() {
@@ -133,48 +132,6 @@ export default {
     handleGroupUpdate(updatedGroup, gIndex) {
       this.conditionCopy.groups.splice(gIndex, 1, updatedGroup);
       this.$emit('update:condition', this.conditionCopy, this.cIndex);
-    },
-
-    async fetchTableColumns() {
-      if (!this.conditionCopy.tableName) {
-        this.errorMessage =
-          'Could not fetch tables columns from your database. Missing name. Please try again.';
-        return;
-      }
-
-      try {
-        const response = await axios.get(
-          `/api/columns?tableName=${this.conditionCopy.tableName}`
-        );
-
-        if (response.status !== 200) {
-          this.errorMessage = 'Failed to fetch table information';
-          throw new Error('Failed to fetch table information');
-        }
-
-        this.columnsOptions = response.data;
-        this.errorMessage = '';
-      } catch (error) {
-        this.errorMessage =
-          'Error fetching table information. Please try again.';
-        console.error('Error fetching table information:', error);
-      }
-    },
-
-    async fetchTableNames() {
-      try {
-        const response = await axios.get('/api/tables');
-
-        if (response.status !== 200) {
-          this.errorMessage = 'Failed to fetch table names';
-          throw new Error('Failed to fetch tables name.');
-        }
-        this.tableNameOptions = response.data;
-        this.errorMessage = '';
-      } catch (error) {
-        this.errorMessage = 'Error fetching tables names. Please try again.';
-        console.error('Error fetching tables names:', error);
-      }
     },
   },
 };
