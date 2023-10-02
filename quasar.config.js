@@ -82,13 +82,6 @@ module.exports = configure(function (/* ctx */) {
       // https: true
       open: true, // opens browser window automatically
     },
-
-    config: {
-      store: {
-        path: 'src/store/index.js', // Replace with the actual path to your Vuex store file
-      },
-    },
-
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
       config: {},
