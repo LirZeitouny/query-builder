@@ -7,7 +7,7 @@
     <q-select
       v-if="gIndex > 0"
       :modelValue="groupCopy.logicalOperator"
-      @update:model-value="emitLogicalOperatorChange"
+      @update:model-value="handleLogicalOperatorChange"
       :options="logicalOperationOptions"
       outlined
       class="q-ma-md col-6"
@@ -57,7 +57,7 @@ export default {
   },
 
   methods: {
-    emitLogicalOperatorChange(value) {
+    handleLogicalOperatorChange(value) {
       this.groupCopy.logicalOperator = value;
       this.$emit('update:group', { ...this.groupCopy }, this.gIndex);
     },

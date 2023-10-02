@@ -14,7 +14,7 @@
       outlined
       class="q-ma-md col-6"
       style="max-width: 100px"
-      @update:model-value="updateLogicalOperator"
+      @update:model-value="(value) => updateValueProp('logicalOperator', value)"
     />
     <q-select
       :modelValue="valueCopy.contains"
@@ -23,7 +23,7 @@
       outlined
       class="q-ma-md col-6"
       style="max-width: 300px"
-      @update:model-value="updateContains"
+      @update:model-value="(value) => updateValueProp('contains', value)"
     />
 
     <q-select
@@ -37,7 +37,7 @@
       hide-dropdown-icon
       label="Value"
       outlined
-      @update:model-value="updateInput"
+      @update:model-value="(value) => updateValueProp('input', value)"
     />
     <q-btn @click="deleteValue" flat round icon="delete" color="negative" />
   </q-card-section>
@@ -65,19 +65,11 @@ export default {
     };
   },
   methods: {
-    updateLogicalOperator(value) {
-      this.valueCopy.logicalOperator = value;
+    updateValueProp(key, value) {
+      this.valueCopy[key] = value;
       this.$emit('update:value', this.valueCopy, this.vIndex);
     },
 
-    updateContains(value) {
-      this.valueCopy.contains = value;
-      this.$emit('update:value', this.valueCopy, this.vIndex);
-    },
-    updateInput(value) {
-      this.valueCopy.input = value;
-      this.$emit('update:value', this.valueCopy, this.vIndex);
-    },
     deleteValue() {
       this.$emit('delete:value', this.vIndex);
     },
