@@ -9,7 +9,6 @@ This project is a web application for creating custom database queries. It allow
 ### Frontend
 
 - **Vue 3**: A progressive JavaScript framework for building user interfaces.
-- **Vuex**: State management library for Vue.js applications.
 - **Vue Router**: Official router for Vue.js.
 - **Quasar**: A high-performance Vue.js framework that provides a set of pre-made UI components.
 - **Axios**: A promise-based HTTP client for making API requests.
@@ -32,7 +31,6 @@ The project is divided into frontend and backend components.
 
 - **app.vue**: The main Vue application component that serves as the entry point for the frontend.
 - **package.json**: Configuration file for frontend dependencies and scripts.
-- **store**: Contains the Vuex store configuration for managing application state.
 - **pages**: Vue components that represent different pages of the application.
 - **components**: Reusable Vue components used throughout the application.
 
