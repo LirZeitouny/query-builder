@@ -37,9 +37,9 @@
 </template>
 
 <script>
-import axios from 'axios';
-import { ContainTypes, LogicalOperatorTypes } from './queryModel';
 import ConditionItem from '../components/query-builder/ConditionItem.vue';
+import { ContainTypes, LogicalOperatorTypes } from '../types/queryModel';
+import { executeCustomQuery } from '../services/queryServices';
 
 export default {
   components: { ConditionItem },
@@ -115,41 +115,31 @@ export default {
     },
 
     async executeQuery() {
-      let query = '';
-      this.conditions.forEach((condition, index) => {
-        const conditionLogicalOperator =
-          index === this.conditions.length - 1 ? '' : condition.logicalOperator;
-        query +=
-          this.queryBuilder(condition, ContainTypes.ANY) +
-          conditionLogicalOperator +
-          ' ';
-      });
-
+      const query = this.buildQuery(this.conditions);
       console.log('Executing query:', query);
 
       if (!query) {
         this.errorMessage = 'Missing Query.';
+        return;
       }
 
       try {
-        const response = await axios.post('/api/custom-query', {
-          query,
-        });
+        const queryResult = await executeCustomQuery(query);
 
-        if (response.status !== 200) {
+        if (queryResult.error) {
           this.errorMessage = 'Error executing query.';
-          throw new Error('Failed to execute your query');
+          console.error('Error executing query:', queryResult.error);
+        } else {
+          this.queryResult = queryResult.data;
+          this.errorMessage = '';
         }
-
-        this.queryResult = response.data;
-        this.errorMessage = '';
       } catch (error) {
         this.errorMessage = 'Error executing query. Please try again.';
         console.error('Error executing query:', error);
       }
     },
 
-    queryBuilder(condition) {
+    conditionBuilder(condition) {
       let res = 'SELECT * ';
       res += `FROM ${condition.tableName} `;
       res += 'WHERE ';
@@ -181,10 +171,21 @@ export default {
 
       return res.replace(/\s+/g, ' '); //removing duplicate spaces
     },
+
+    buildQuery() {
+      let query = '';
+      this.conditions.forEach((condition, index) => {
+        const conditionLogicalOperator =
+          index === this.conditions.length - 1 ? '' : condition.logicalOperator;
+        query +=
+          this.conditionBuilder(condition) + conditionLogicalOperator + ' ';
+      });
+
+      return query;
+    },
   },
 };
 </script>
 
 <style scoped>
-/* Add your custom CSS styles here */
 </style>
