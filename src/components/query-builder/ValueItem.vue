@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { ContainTypes, LogicalOperatorTypes } from '../../pages/queryModel';
+import { ContainTypes, LogicalOperatorTypes } from '../../types/queryModel';
 
 export default {
   props: {

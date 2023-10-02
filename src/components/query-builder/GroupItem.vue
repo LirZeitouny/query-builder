@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { ContainTypes, LogicalOperatorTypes } from '../../pages/queryModel';
+import { ContainTypes, LogicalOperatorTypes } from '../../types/queryModel';
 
 import ValueItem from './ValueItem.vue';
 export default {
