@@ -50,3 +50,5 @@ export async function fetchTableColumns(tableName) {
     throw new Error('Error fetching table information. Please try again.');
   }
 }
+
+//TODO: move to typescript

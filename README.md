@@ -1,142 +1,73 @@
-# Noname-Lir Project
+Custom Query Builder
+Quasar LIR Logo
 
-## Description
+Table of Contents
+Introduction
+Project Structure
+Getting Started
+Usage
+Component Breakdown
+Queries and Data Models
+Contributing
+License
+Introduction
+Quasar LIR is a custom query builder web application built using the Quasar framework. It allows users to create and execute custom database queries using a user-friendly interface. This README provides an overview of the project structure and how to get started with development.
 
-This project is a web application for creating custom database queries. It allows users to build complex SQL queries using a user-friendly interface.
+Project Structure
+The project structure follows a typical Quasar project setup with additional directories and components specific to the custom query builder:
 
-## Technologies and Libraries Used
+src: This directory contains the main source code for the Quasar LIR project.
+assets: Any static assets such as images or fonts are stored here.
+components: Custom Vue components used throughout the application.
+query-builder: Contains components related to the custom query builder interface.
+layouts: Layouts for different sections of the application.
+pages: Vue pages that correspond to different views of the application.
+services: Modules for interacting with external services (e.g., making API requests).
+types: TypeScript type definitions for the project.
+App.vue: The root Vue component.
+main.ts: The entry point for the application.
+public: Static files placed here will be accessible as-is from the root URL.
+quasar.conf.js: Configuration file for the Quasar app.
+Getting Started
+To run this Quasar project locally, follow these steps:
 
-### Frontend
+Clone the repository:
 
-- **Vue 3**: A progressive JavaScript framework for building user interfaces.
-- **Vue Router**: Official router for Vue.js.
-- **Quasar**: A high-performance Vue.js framework that provides a set of pre-made UI components.
-- **Axios**: A promise-based HTTP client for making API requests.
-- **TypeScript**: A statically typed superset of JavaScript.
-- **Prettier and ESLint**: Code formatting and linting tools for maintaining code quality.
+shell
+Copy code
+git clone https://github.com/yourusername/quasar-lir.git
+cd quasar-lir
+Install dependencies:
 
-### Backend
+shell
+Copy code
+npm install
+Start the development server:
 
-- **Node.js**: A JavaScript runtime environment for server-side development.
-- **Express.js**: A popular web application framework for Node.js.
-- **SQLite**: A self-contained, serverless, and zero-configuration SQL database engine.
-- **Cors**: Middleware for handling Cross-Origin Resource Sharing (CORS) in Express.
-- **Body Parser**: Middleware for parsing JSON request bodies.
+shell
+Copy code
+npm run dev
+Open your browser and visit http://localhost:8080 to access the Quasar LIR application.
 
-## Project Structure
+Usage
+Quasar LIR provides a user-friendly interface for creating custom database queries. Users can add conditions, specify logical operators, and execute queries. Here are some key features:
 
-The project is divided into frontend and backend components.
+Create Conditions: Users can add conditions to build complex queries. Each condition can have multiple groups and values.
 
-### Frontend
+Logical Operators: Logical operators like AND and OR can be used to connect conditions and groups.
 
-- **app.vue**: The main Vue application component that serves as the entry point for the frontend.
-- **package.json**: Configuration file for frontend dependencies and scripts.
-- **pages**: Vue components that represent different pages of the application.
-- **components**: Reusable Vue components used throughout the application.
+Execute Queries: Users can execute custom queries to fetch data from the connected database.
 
-### Backend
+Query Result: The result of the executed query is displayed in a tabular format.
 
-- **server.js**: The main Node.js server file responsible for handling API requests and serving the frontend.
-- **mydatabase.db**: SQLite database file for storing application data.
-- **package.json**: Configuration file for backend dependencies and scripts.
+Component Breakdown
+The application is structured around several Vue components that work together to create the custom query builder interface. Here's an overview of these components:
 
-## Getting Started
+ConditionItem.vue: Represents a single condition in the query builder. It contains groups of values and logical operators.
 
-To run the project, follow these steps:
+GroupItem.vue: Represents a group of values within a condition. Users can add logical operators and values to groups.
 
-1. Clone the repository:
+ValueItem.vue: Represents a single value within a group. Users can specify the type of containment, logical operators, and input values.
 
-   ```bash
-   git clone <repository-url>
-   cd noname-lir
-   ```
-
-2. Install frontend dependencies:
-
-   ```bash
-   cd quasar-project
-   npm install
-   ```
-
-3. Install backend dependencies:
-
-   ```bash
-   cd backend
-   npm install
-   ```
-
-4. Start the frontend development server:
-
-   ```bash
-   cd quasar-project
-   npm run dev
-   ```
-
-5. Start the backend server:
-
-   ```bash
-   cd backend
-   npm start
-   ```
-
-6. Access the application in your web browser at `http://localhost:3000`.
-
-## Usage
-
-1. Upon opening the application, you will be presented with a user-friendly interface for creating custom database queries.
-
-2. Start by adding conditions, groups, and values to construct your query.
-
-3. You can select tables and columns from the available options.
-
-4. Use logical operators and containment options to build complex conditions.
-
-5. Click the "Execute Query" button to run your query against the database.
-
-6. View the query results in a table format.
-
-## Acknowledgments
-
-- The project was developed by [Lir Zeitouny](mailto:lirzetouny@gmail.com).
-
-Feel free to customize this README to suit your project's specific details and requirements.
-
-# Query Model Structure
-
-In this project, we define a query model structure in `queryModel.ts` to represent various aspects of our application's data and queries. This structure is used throughout the application for building and working with dynamic queries.
-
-## Condition
-
-The `Condition` interface represents a query condition and has the following properties:
-
-- `groups`: An array of `Group` objects, allowing conditions to be grouped together.
-- `logicalOperator`: Specifies the logical operator used to combine groups within this condition.
-- `depth`: Indicates the depth of nesting for this condition.
-- `columns`: Represents the selected columns for this condition.
-- `tableName`: Represents the selected table name for this condition.
-
-## Value
-
-The `Value` interface represents a single value within a query condition. It includes the following properties:
-
-- `contains`: Indicates whether this value should match any or all of the specified values.
-- `input`: An array of strings representing the input values.
-- `logicalOperator`: Specifies the logical operator used to combine input values within this value.
-
-## QueryResultItem
-
-The `QueryResultItem` interface represents an item in the query result. It includes properties such as `ID`, `Name`, `City`, `Position`, `Experience`, `Department`, and `Salary` to describe the attributes of a result item.
-
-## Group
-
-The `Group` interface represents a grouping of values within a query condition. It includes the following properties:
-
-- `values`: An array of `Value` objects, allowing multiple values to be grouped together.
-- `logicalOperator`: Specifies the logical operator used to combine values within this group.
-- `group` (optional): Represents a nested group within this group. It's optional, allowing for nested conditions.
-
-## Enums
-
-We also define two enums, `ContainTypes` and `LogicalOperatorTypes`, to provide predefined options for the `contains` property and logical operators used in the query model.
-
-These structures are essential for creating and managing dynamic queries within the application, offering flexibility and clarity when working with complex conditions and result sets.
+Queries and Data Models
+The application uses TypeScript data models to define queries and query result items. These models are defined in queryModel.ts. You can customize these models to fit your database schema.
