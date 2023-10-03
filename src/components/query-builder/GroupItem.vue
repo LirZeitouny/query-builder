@@ -95,7 +95,7 @@ export default {
         values: [...this.group.values, newValue],
       };
 
-      -this.$emit('update:group', newGroup, this.gIndex);
+      this.$emit('update:group', newGroup, this.gIndex);
     },
 
     addGroup() {
