@@ -4,18 +4,16 @@
       <!-- Condition start -->
       <q-select
         v-if="cIndex > 0"
-        :modelValue="conditionCopy.logicalOperator"
-        @update:model-value="
-          (value) => updateConditionProp('logicalOperator', value)
-        "
+        :modelValue="condition.logicalOperator"
+        @update:model-value="updateCondition('logicalOperator', $event)"
         :options="logicalOperationOptions"
         outlined
         class="q-ma-md col-6"
         style="max-width: 100px"
       />
       <q-select
-        :modelValue="conditionCopy.column"
-        @update:model-value="(value) => updateConditionProp('column', value)"
+        :modelValue="condition.column"
+        @update:model-value="updateCondition('column', $event)"
         :options="columnsOptions"
         label="Where"
         outlined
@@ -25,8 +23,8 @@
         style="max-width: 300px"
       />
       <q-select
-        :modelValue="conditionCopy.tableName"
-        @update:model-value="(value) => updateConditionProp('tableName', value)"
+        :modelValue="condition.tableName"
+        @update:model-value="handleTableNameUpdate($event)"
         :options="tableNameOptions"
         label="In"
         outlined
@@ -37,7 +35,7 @@
     </q-card-section>
     <!-- Groups-->
     <group-item
-      v-for="(group, gIndex) in conditionCopy.groups"
+      v-for="(group, gIndex) in condition.groups"
       :key="gIndex"
       :style="{ 'margin-left': gIndex * 100 + 'px' }"
       :group="group"
@@ -61,15 +59,14 @@ const MAX_DEPTH = 3;
 
 export default {
   props: {
-    condition: Object, // The 'condition' prop from the parent
-    cIndex: Number, // The 'cIndex' prop from the parent
+    condition: Object,
+    cIndex: Number,
   },
 
   data() {
     return {
       tableNameOptions: [],
       columnsOptions: [],
-      conditionCopy: { ...this.condition },
       errorMessage: '',
     };
   },
@@ -92,18 +89,21 @@ export default {
   },
 
   methods: {
-    updateConditionProp(key, value) {
-      this.conditionCopy[key] = value;
-      if (key === 'tableName') this.updateColumnsFromTable(value);
-      this.$emit('update:condition', this.conditionCopy, this.cIndex);
+    updateCondition(key, value) {
+      this.$emit(
+        'update:condition',
+        { ...this.condition, [key]: value },
+        this.cIndex
+      );
     },
 
-    async updateColumnsFromTable(tableName) {
+    async handleTableNameUpdate(tableName) {
       this.columnsOptions = await fetchTableColumns(tableName);
+      this.updateCondition('tableName', tableName);
     },
 
     handleAddGroup() {
-      if (this.conditionCopy.groups.length === MAX_DEPTH) return;
+      if (this.condition.groups.length === MAX_DEPTH) return;
       const newGroup = {
         values: [
           {
@@ -114,24 +114,34 @@ export default {
         ],
         logicalOperator: LogicalOperatorTypes.OR,
       };
-
-      this.conditionCopy.groups.push(newGroup);
-      this.$emit('update:condition', this.conditionCopy, this.cIndex);
+      const newCondition = {
+        ...this.condition,
+        groups: [...this.condition.groups, newGroup],
+      };
+      this.$emit('update:condition', newCondition, this.cIndex);
     },
 
     handleDeleteGroup(gIndex) {
-      this.conditionCopy.groups.splice(gIndex, 1);
+      const newCondition = {
+        ...this.condition,
+        groups: this.condition.groups.filter((_, index) => index !== gIndex),
+      };
 
-      if (this.conditionCopy.groups.length === 0) {
+      if (newCondition.groups.length === 0) {
         this.$emit('delete-condition');
       } else {
-        this.$emit('update:condition', this.conditionCopy, this.cIndex);
+        this.$emit('update:condition', newCondition, this.cIndex);
       }
     },
 
     handleGroupUpdate(updatedGroup, gIndex) {
-      this.conditionCopy.groups.splice(gIndex, 1, updatedGroup);
-      this.$emit('update:condition', this.conditionCopy, this.cIndex);
+      const newCondition = {
+        ...this.condition,
+        groups: this.condition.groups.map((group, index) =>
+          index === gIndex ? updatedGroup : group
+        ),
+      };
+      this.$emit('update:condition', newCondition, this.cIndex);
     },
   },
 };

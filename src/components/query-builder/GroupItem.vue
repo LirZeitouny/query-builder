@@ -6,7 +6,7 @@
     </q-card-section>
     <q-select
       v-if="gIndex > 0"
-      :modelValue="groupCopy.logicalOperator"
+      :modelValue="group.logicalOperator"
       @update:model-value="handleLogicalOperatorChange"
       :options="logicalOperationOptions"
       outlined
@@ -16,11 +16,11 @@
     </q-select>
     <!-- Values -->
     <value-item
-      v-for="(value, vIndex) in groupCopy.values"
+      v-for="(value, vIndex) in group.values"
       :key="vIndex"
       :valueProp="value"
       :vIndex="vIndex"
-      @update:value="handleValueChange"
+      @update:value="handleValueUpdate"
       @delete:value="handleValueDelete"
     >
     </value-item>
@@ -50,31 +50,36 @@ export default {
     },
   },
 
-  data() {
-    return {
-      groupCopy: { ...this.group },
-    };
-  },
-
   methods: {
     handleLogicalOperatorChange(value) {
-      this.groupCopy.logicalOperator = value;
-      this.$emit('update:group', { ...this.groupCopy }, this.gIndex);
+      this.$emit(
+        'update:group',
+        { ...this.group, logicalOperator: value },
+        this.gIndex
+      );
     },
 
-    handleValueChange(updatedValue, vIndex) {
-      this.groupCopy.values.splice(vIndex, 1, updatedValue);
+    handleValueUpdate(updatedValue, vIndex) {
+      const newGroup = {
+        ...this.group,
+        values: this.group.values.map((value, index) =>
+          index === vIndex ? updatedValue : value
+        ),
+      };
 
-      this.$emit('update:group', this.groupCopy, this.gIndex);
+      this.$emit('update:group', newGroup, this.gIndex);
     },
 
     handleValueDelete(vIndex) {
-      this.groupCopy.values.splice(vIndex, 1);
+      const newGroup = {
+        ...this.group,
+        values: this.group.values.filter((_, index) => index !== vIndex),
+      };
 
-      if (this.groupCopy.values.length === 0) {
+      if (newGroup.values.length === 0) {
         this.$emit('delete-group');
       } else {
-        this.$emit('update:group', this.groupCopy, this.gIndex);
+        this.$emit('update:group', newGroup, this.gIndex);
       }
     },
 
@@ -84,8 +89,13 @@ export default {
         logicalOperator: LogicalOperatorTypes.OR,
         input: [],
       };
-      this.groupCopy.values.push(newValue);
-      this.$emit('update:group', this.groupCopy, this.gIndex);
+
+      const newGroup = {
+        ...this.group,
+        values: [...this.group.values, newValue],
+      };
+
+      -this.$emit('update:group', newGroup, this.gIndex);
     },
 
     addGroup() {

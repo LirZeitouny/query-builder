@@ -9,35 +9,35 @@
     </p>
     <q-select
       v-else
-      :modelValue="valueCopy.logicalOperator"
+      ג
+      :modelValue="valueProp.logicalOperator"
       :options="logicalOperationOptions"
       outlined
       class="q-ma-md col-6"
       style="max-width: 100px"
-      @update:model-value="(value) => updateValueProp('logicalOperator', value)"
+      @update:model-value="updateValueProp('logicalOperator', $event)"
     />
     <q-select
-      :modelValue="valueCopy.contains"
+      :modelValue="valueProp.contains"
       :options="containTypeOptions"
       label="Contains"
       outlined
       class="q-ma-md col-6"
       style="max-width: 300px"
-      @update:model-value="(value) => updateValueProp('contains', value)"
+      @update:model-value="updateValueProp('contains', $event)"
     />
 
     <q-select
       class="q-ma-md col-6"
       style="max-width: 600px"
-      :modelValue="valueCopy.input"
+      :modelValue="valueProp.input"
       use-input
-      use-chips
       new-value-mode="add"
       multiple
       hide-dropdown-icon
       label="Value"
       outlined
-      @update:model-value="(value) => updateValueProp('input', value)"
+      @update:model-value="updateValueProp('input', $event)"
     />
     <q-btn @click="deleteValue" flat round icon="delete" color="negative" />
   </q-card-section>
@@ -59,15 +59,14 @@ export default {
       return Object.values(ContainTypes);
     },
   },
-  data() {
-    return {
-      valueCopy: { ...this.valueProp },
-    };
-  },
+
   methods: {
     updateValueProp(key, value) {
-      this.valueCopy[key] = value;
-      this.$emit('update:value', this.valueCopy, this.vIndex);
+      this.$emit(
+        'update:value',
+        { ...this.valueProp, [key]: value },
+        this.vIndex
+      );
     },
 
     deleteValue() {
